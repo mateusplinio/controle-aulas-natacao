@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Aulas - Academia de Natação</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-swimmer"></i> Controle de Aulas</h1>
+                <p class="subtitle">Academia de Natação - Professoras Daniele e Isabela</p>
+                <div class="status" id="status">
+                    <i class="fas fa-check-circle"></i> Sistema Pronto
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard -->
+        <section class="dashboard">
+            <div class="cards">
+                <div class="card">
+                    <h3><i class="fas fa-calendar-day"></i> Hoje</h3>
+                    <p class="value" id="totalHoje">0</p>
+                    <p class="subtitle">aulas</p>
+                </div>
+                <div class="card card-daniele">
+                    <h3><i class="fas fa-user-tie"></i> Daniele</h3>
+                    <p class="value" id="totalDaniele">0</p>
+                    <p class="subtitle">total</p>
+                </div>
+                <div class="card card-isabela">
+                    <h3><i class="fas fa-user-tie"></i> Isabela</h3>
+                    <p class="value" id="totalIsabela">0</p>
+                    <p class="subtitle">total</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-chart-line"></i> Este Mês</h3>
+                    <p class="value" id="totalMes">0</p>
+                    <p class="subtitle">aulas</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Formulário de Lançamento -->
+        <section class="form-section">
+            <h2><i class="fas fa-plus-circle"></i> Lançar Nova Aula</h2>
+            <form id="aulaForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="data"><i class="far fa-calendar"></i> Data</label>
+                        <input type="date" id="data" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="professora"><i class="fas fa-chalkboard-teacher"></i> Professora</label>
+                        <select id="professora" required>
+                            <option value="">Selecione</option>
+                            <option value="Daniele">Daniele</option>
+                            <option value="Isabela">Isabela</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantidade"><i class="fas fa-list-ol"></i> Quantidade</label>
+                        <div class="quantity-control">
+                            <button type="button" class="qty-btn" onclick="adjustQuantity(-1)">-</button>
+                            <input type="number" id="quantidade" min="1" max="10" value="1" required>
+                            <button type="button" class="qty-btn" onclick="adjustQuantity(1)">+</button>
+                        </div>
+                        <small>Número de aulas ministradas</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar Aula
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="setToday()">
+                        <i class="fas fa-calendar-day"></i> Usar Hoje
+                    </button>
+                </div>
+                
+                <div class="form-info">
+                    <p><i class="fas fa-info-circle"></i> Dados salvos diretamente no Google Sheets</p>
+                </div>
+            </form>
+        </section>
+
+        <!-- Gráficos -->
+        <section class="charts-section">
+            <h2><i class="fas fa-chart-bar"></i> Estatísticas</h2>
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Distribuição por Professora</h3>
+                    <canvas id="chartProfessoras"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Aulas nos Últimos 7 Dias</h3>
+                    <canvas id="chartSemanal"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabela de Registros -->
+        <section class="table-section">
+            <h2><i class="fas fa-history"></i> Registros</h2>
+            
+            <div class="table-controls">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="filtroPeriodo"><i class="fas fa-filter"></i> Período:</label>
+                        <select id="filtroPeriodo" onchange="filtrarRegistros()">
+                            <option value="hoje">Hoje</option>
+                            <option value="semana">Esta Semana</option>
+                            <option value="mes">Este Mês</option>
+                            <option value="todos">Todos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="filtroProfessora">Professora:</label>
+                        <select id="filtroProfessora" onchange="filtrarRegistros()">
+                            <option value="">Todas</option>
+                            <option value="Daniele">Daniele</option>
+                            <option value="Isabela">Isabela</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button onclick="carregarDados()" class="btn btn-refresh">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                    <button onclick="exportarExcel()" class="btn btn-export">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Dia</th>
+                            <th>Professora</th>
+                            <th>Quantidade</th>
+                            <th>Registro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaRegistros">
+                        <!-- Dados carregados aqui -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3"><strong>Total do período:</strong></td>
+                            <td id="totalPeriodo">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <div class="table-info">
+                <p><i class="fas fa-database"></i> Total de registros: <span id="totalRegistros">0</span></p>
+            </div>
+        </section>
+
+        <!-- Resumo por Professora -->
+        <section class="summary-section">
+            <h2><i class="fas fa-user-tie"></i> Resumo por Professora</h2>
+            <div class="summary-cards">
+                <div class="summary-card daniele">
+                    <div class="summary-header">
+                        <h3><i class="fas fa-user-tie"></i> Daniele</h3>
+                        <span class="badge badge-daniele" id="resumoTotalDaniele">0</span>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <span class="label">Este mês:</span>
+                            <span class="value" id="danieleMes">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Média/dia:</span>
+                            <span class="value" id="danieleMedia">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Dias trabalhados:</span>
+                            <span class="value" id="danieleDias">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-card isabela">
+                    <div class="summary-header">
+                        <h3><i class="fas fa-user-tie"></i> Isabela</h3>
+                        <span class="badge badge-isabela" id="resumoTotalIsabela">0</span>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat">
+                            <span class="label">Este mês:</span>
+                            <span class="value" id="isabelaMes">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Média/dia:</span>
+                            <span class="value" id="isabelaMedia">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Dias trabalhados:</span>
+                            <span class="value" id="isabelaDias">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuração -->
+        <section class="config-section">
+            <h2><i class="fas fa-cog"></i> Configuração do Google Sheets</h2>
+            <div class="config-card">
+                <p><strong>Status:</strong> <span id="configStatus" class="status-badge">Pronto para uso</span></p>
+                
+                <div class="config-info">
+                    <p><i class="fas fa-check-circle"></i> ID da Planilha já configurado</p>
+                    <p><i class="fas fa-check-circle"></i> Sistema sincronizado com Google Sheets</p>
+                    <p><i class="fas fa-check-circle"></i> GitHub Pages configurado</p>
+                </div>
+                
+                <div class="config-actions">
+                    <button onclick="testarConexao()" class="btn btn-test">
+                        <i class="fas fa-wifi"></i> Testar Conexão
+                    </button>
+                    <button onclick="limparDadosLocais()" class="btn btn-clear">
+                        <i class="fas fa-broom"></i> Limpar Cache
+                    </button>
+                </div>
+                
+                <div class="config-help">
+                    <p><strong><i class="fas fa-lightbulb"></i> Dica:</strong> Os dados são salvos diretamente na sua planilha do Google. Acesse:</p>
+                    <a href="https://docs.google.com/spreadsheets/d/1bJyd3TF5DepaIZWR5lKi48CIBbCa-W8M9awZkQrbsEQ" 
+                       target="_blank" class="btn-link">
+                        <i class="fas fa-external-link-alt"></i> Abrir Planilha
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rodapé -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>Sistema de Controle de Aulas © 2024 - Academia de Natação</p>
+                <div class="footer-links">
+                    <span><i class="fas fa-sync-alt"></i> Google Sheets</span>
+                    <span><i class="fas fa-mobile-alt"></i> Responsivo</span>
+                    <span><i class="fas fa-bolt"></i> Tempo Real</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal de Carregamento -->
+    <div id="loadingModal" class="modal">
+        <div class="modal-content">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+            <p id="loadingText">Processando...</p>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content confirm">
+            <h3 id="confirmTitle">Confirmar</h3>
+            <p id="confirmMessage">Tem certeza?</p>
+            <div class="modal-buttons">
+                <button id="confirmYes" class="btn btn-primary">Sim</button>
+                <button id="confirmNo" class="btn btn-secondary">Não</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    
+    <script>
+        // Funções auxiliares globais
+        function adjustQuantity(change) {
+            const input = document.getElementById('quantidade');
+            let value = parseInt(input.value) + change;
+            if (value < 1) value = 1;
+            if (value > 10) value = 10;
+            input.value = value;
+        }
+        
+        function setToday() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('data').value = hoje;
+        }
+        
+        function filtrarRegistros() {
+            if (typeof window.filtrarTabela === 'function') {
+                window.filtrarTabela();
+            }
+        }
+        
+        function carregarDados() {
+            if (typeof window.carregarDoGoogleSheets === 'function') {
+                window.carregarDoGoogleSheets();
+            }
+        }
+        
+        function exportarExcel() {
+            if (typeof window.exportarParaCSV === 'function') {
+                window.exportarParaCSV();
+            }
+        }
+        
+        function testarConexao() {
+            if (typeof window.testarConexaoSheets === 'function') {
+                window.testarConexaoSheets();
+            }
+        }
+        
+        function limparDadosLocais() {
+            if (typeof window.limparCacheLocal === 'function') {
+                window.limparCacheLocal();
+            }
+        }
+        
+        // Configurar data atual ao carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            setToday();
+        });
+    </script>
+</body>
+</html>
