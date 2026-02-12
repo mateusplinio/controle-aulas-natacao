@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aquacris - Sistema de Aulas de Natação</title>
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK CORRETO - Versão mais recente -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <!-- Chart.js -->
@@ -12,6 +12,7 @@
     <!-- Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ESTILOS IGUAIS AO CÓDIGO ANTERIOR - MANTIDOS POR QUESTÃO DE ESPAÇO */
         * {
             margin: 0;
             padding: 0;
@@ -386,7 +387,6 @@
             color: var(--primary-blue);
         }
 
-        /* Calendário */
         .calendar-section {
             background: var(--white);
             border-radius: 20px;
@@ -891,7 +891,6 @@
             }
         }
 
-        /* Estilização da scrollbar */
         .records-container::-webkit-scrollbar {
             width: 8px;
         }
@@ -910,7 +909,6 @@
             background: var(--dark-blue);
         }
 
-        /* Indicadores */
         .indicators {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -973,7 +971,6 @@
 <body>
     <div class="waves"></div>
     
-    <!-- Gotas de água decorativas -->
     <div class="water-drop" style="left: 10%; animation-delay: 0s;"></div>
     <div class="water-drop" style="left: 30%; animation-delay: 1s;"></div>
     <div class="water-drop" style="left: 50%; animation-delay: 2s;"></div>
@@ -1056,7 +1053,6 @@
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
-                <!-- PAINEL DE ESTATÍSTICAS DO MÊS -->
                 <div class="dashboard-grid" id="statsGrid">
                     <!-- Estatísticas serão carregadas aqui -->
                 </div>
@@ -1091,7 +1087,6 @@
                 </button>
             </div>
 
-            <!-- INDICADORES INTERATIVOS -->
             <div class="indicators">
                 <div class="indicator-card">
                     <div class="indicator-label">Total de Aulas (Filtrado)</div>
@@ -1141,7 +1136,6 @@
             </div>
         </div>
 
-        <!-- CALENDÁRIO MENSAL -->
         <div class="calendar-section">
             <div class="calendar-header">
                 <div class="calendar-title">
@@ -1203,21 +1197,60 @@
     </div>
 
     <script>
-        // Configuração do Firebase com suas credenciais
+        // =============================================
+        // CONFIGURAÇÃO CORRIGIDA DO FIREBASE
+        // =============================================
+        
+        // Suas credenciais do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAMA8urWYKIqVcsCNl_P7Lh-sHjGM_AjVw",
             authDomain: "aulas-natacao.firebaseapp.com",
             projectId: "aulas-natacao",
-            storageBucket: "aulas-natacao.firebasestorage.app",
+            storageBucket: "aulas-natacao.appspot.com", // CORRIGIDO: removido .firebasestorage.app
             messagingSenderId: "527894528710",
             appId: "1:527894528710:web:b0f5938e35d40b32ee8dc7"
         };
 
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // Inicializar Firebase com tratamento de erro
+        let db;
+        
+        try {
+            // Verificar se já existe uma instância
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            } else {
+                firebase.app();
+            }
+            
+            db = firebase.firestore();
+            
+            // Configurar Firestore para usar configurações persistentes
+            db.settings({
+                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+            });
+            
+            // Habilitar persistência offline
+            db.enablePersistence()
+                .catch((err) => {
+                    if (err.code === 'failed-precondition') {
+                        console.log('Persistência falhou - múltiplas abas abertas');
+                    } else if (err.code === 'unimplemented') {
+                        console.log('Persistência não disponível neste navegador');
+                    }
+                });
+                
+            console.log('Firebase inicializado com sucesso!');
+            
+        } catch (error) {
+            console.error('Erro ao inicializar Firebase:', error);
+            document.getElementById('statusText').textContent = 'Erro de conexão';
+            document.getElementById('statusDot').classList.add('offline');
+        }
 
-        // Variáveis globais
+        // =============================================
+        // VARIÁVEIS GLOBAIS
+        // =============================================
+        
         let records = [];
         let filteredRecords = [];
         let selectedTeacher = null;
@@ -1260,10 +1293,12 @@
         const daysChangeEl = document.getElementById('daysChange');
         const classesDayChangeEl = document.getElementById('classesDayChange');
 
+        // =============================================
+        // FUNÇÕES PRINCIPAIS
+        // =============================================
+
         // Data padrão = hoje
         document.getElementById('date').valueAsDate = new Date();
-
-        // Focar no campo de quantidade
         document.getElementById('quantity').focus();
 
         // Selecionar professora
@@ -1313,7 +1348,7 @@
                 document.getElementById('quantity').focus();
             } catch (error) {
                 console.error('Erro ao salvar:', error);
-                showNotification('Erro ao salvar a aula', 'error');
+                showNotification('Erro ao salvar a aula: ' + error.message, 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><span>Salvar na Nuvem</span>';
@@ -1324,6 +1359,11 @@
         async function loadRecords() {
             try {
                 statusText.textContent = 'Carregando dados...';
+                
+                // Verificar se db está definido
+                if (!db) {
+                    throw new Error('Firebase não inicializado');
+                }
                 
                 const snapshot = await db.collection('classes')
                     .orderBy('timestamp', 'desc')
@@ -1343,7 +1383,7 @@
                 
                 console.log('Registros carregados:', records.length);
                 
-                // Atualizar dados filtrados
+                // Atualizar tudo
                 applyFilter();
                 updateStats();
                 updateIndicators();
@@ -1352,11 +1392,12 @@
                 
                 statusText.textContent = 'Conectado ao Firebase';
                 statusDot.classList.remove('offline');
+                
             } catch (error) {
                 console.error('Erro ao carregar:', error);
                 statusText.textContent = 'Erro de conexão';
                 statusDot.classList.add('offline');
-                showNotification('Erro ao carregar dados', 'error');
+                showNotification('Erro ao carregar dados: ' + error.message, 'error');
             }
         }
 
@@ -1469,8 +1510,6 @@
                 }
             });
             
-            console.log('Registros do mês:', monthRecords.length);
-            
             const totalClasses = monthRecords.reduce((sum, r) => sum + (r.quantity || 0), 0);
             const danieleClasses = monthRecords
                 .filter(r => r.teacher === 'Daniele')
@@ -1573,12 +1612,12 @@
                     showNotification('Aula excluída com sucesso!', 'success');
                 } catch (error) {
                     console.error('Erro ao excluir:', error);
-                    showNotification('Erro ao excluir aula', 'error');
+                    showNotification('Erro ao excluir aula: ' + error.message, 'error');
                 }
             }
         }
 
-        // CORRIGIDO: Gráfico semanal com dias da semana corretos
+        // Gráfico semanal CORRIGIDO
         function updateWeeklyChart() {
             const ctx = document.getElementById('weeklyChart').getContext('2d');
             
@@ -1598,15 +1637,12 @@
                 return dayRecords.reduce((sum, r) => sum + (r.quantity || 0), 0);
             });
             
-            console.log('Últimos 7 dias:', last7Days);
-            console.log('Totais diários:', dailyTotals);
-            
             // Destruir gráfico anterior se existir
             if (charts.weekly) {
                 charts.weekly.destroy();
             }
             
-            // Formatar labels com o nome completo do dia da semana
+            // Formatar labels com o nome do dia da semana
             const labels = last7Days.map(date => {
                 const d = new Date(date);
                 const dayName = d.toLocaleDateString('pt-BR', { weekday: 'short' });
@@ -1677,7 +1713,7 @@
             });
         }
 
-        // Gráfico de distribuição por professora com dados filtrados
+        // Gráfico de distribuição por professora
         function updateTeacherChart() {
             const ctx = document.getElementById('teacherChart').getContext('2d');
             
@@ -1896,7 +1932,7 @@
             });
         }
 
-        // NOVO: Atualizar calendário mensal
+        // Atualizar calendário mensal
         function updateCalendar() {
             const year = calendarDate.getFullYear();
             const month = calendarDate.getMonth();
@@ -1904,7 +1940,7 @@
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             
-            const startOffset = firstDay.getDay(); // 0 = Domingo
+            const startOffset = firstDay.getDay();
             const totalDays = lastDay.getDate();
             
             let calendarHTML = '';
@@ -2034,7 +2070,6 @@
             updateStats();
         });
 
-        // Controles do calendário
         prevCalendarMonth.addEventListener('click', () => {
             calendarDate.setMonth(calendarDate.getMonth() - 1);
             updateCalendar();
@@ -2047,6 +2082,8 @@
 
         // Escutar atualizações em tempo real do Firebase
         function setupRealtimeListener() {
+            if (!db) return;
+            
             db.collection('classes')
                 .orderBy('timestamp', 'desc')
                 .onSnapshot((snapshot) => {
@@ -2060,6 +2097,15 @@
         // Inicializar
         async function init() {
             console.log('Inicializando Aquacris...');
+            
+            // Verificar se o Firebase foi inicializado
+            if (!db) {
+                statusText.textContent = 'Erro de conexão';
+                statusDot.classList.add('offline');
+                showNotification('Erro ao conectar ao Firebase. Verifique sua configuração.', 'error');
+                return;
+            }
+            
             await loadRecords();
             updateCurrentMonth();
             setupRealtimeListener();
@@ -2071,6 +2117,7 @@
         // Função de debug
         window.debugData = function() {
             console.log('=== DEBUG AQUACRIS ===');
+            console.log('Firebase DB:', db ? 'Conectado' : 'Desconectado');
             console.log('Total de registros:', records.length);
             console.log('Registros filtrados:', filteredRecords.length);
             console.log('Filtro atual:', currentFilter);
