@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aquacris - Sistema de Aulas de Natação</title>
-    <!-- Firebase SDK CORRETO - Versão mais recente -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ESTILOS IGUAIS AO CÓDIGO ANTERIOR - MANTIDOS POR QUESTÃO DE ESPAÇO */
         * {
             margin: 0;
             padding: 0;
@@ -295,7 +292,7 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 25px;
             margin-bottom: 30px;
         }
@@ -360,40 +357,14 @@
             font-weight: 500;
         }
 
-        .chart-container {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 5px 20px rgba(30, 136, 229, 0.1);
-            margin-bottom: 25px;
-            height: 400px;
-            position: relative;
-            border: 2px solid rgba(79, 195, 247, 0.2);
-        }
-
-        .chart-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--dark-blue);
-            margin-bottom: 20px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .chart-title i {
-            color: var(--primary-blue);
-        }
-
+        /* Estilos do Calendário */
         .calendar-section {
             background: var(--white);
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 5px 20px rgba(30, 136, 229, 0.1);
-            margin-top: 25px;
             border: 2px solid rgba(79, 195, 247, 0.2);
+            margin-bottom: 30px;
         }
 
         .calendar-header {
@@ -401,139 +372,164 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         .calendar-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--dark-blue);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
 
-        .calendar-controls {
+        .calendar-title h2 {
+            font-size: 28px;
+            color: var(--dark-blue);
+            margin: 0;
+        }
+
+        .calendar-nav {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 15px;
         }
 
-        .calendar-btn {
-            padding: 10px 20px;
+        .calendar-nav-btn {
+            background: none;
             border: 2px solid rgba(79, 195, 247, 0.3);
-            border-radius: 10px;
-            background: rgba(79, 195, 247, 0.05);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary-blue);
             cursor: pointer;
             transition: all 0.3s;
-            color: var(--dark-blue);
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .calendar-btn:hover {
+        .calendar-nav-btn:hover {
+            background: var(--primary-blue);
+            color: var(--white);
             border-color: var(--primary-blue);
-            background: rgba(30, 136, 229, 0.1);
         }
 
         .calendar-weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 10px;
             margin-bottom: 10px;
             text-align: center;
             font-weight: 600;
             color: var(--dark-blue);
-            padding: 10px 0;
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 12px;
         }
 
         .calendar-days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 10px;
         }
 
         .calendar-day {
-            aspect-ratio: 1;
-            border: 2px solid rgba(79, 195, 247, 0.1);
+            background: rgba(79, 195, 247, 0.05);
+            border: 2px solid rgba(79, 195, 247, 0.2);
             border-radius: 12px;
-            padding: 10px;
+            padding: 15px;
+            min-height: 100px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            background: rgba(79, 195, 247, 0.02);
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
         }
 
         .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.15);
             border-color: var(--primary-blue);
-            background: rgba(79, 195, 247, 0.05);
-            transform: scale(1.02);
         }
 
         .calendar-day.empty {
-            background: transparent;
-            border: 2px solid transparent;
+            background: rgba(79, 195, 247, 0.02);
+            border: 2px dashed rgba(79, 195, 247, 0.2);
         }
 
-        .calendar-day-number {
-            font-size: 16px;
+        .calendar-day.today {
+            border-color: var(--primary-blue);
+            background: rgba(30, 136, 229, 0.05);
+        }
+
+        .day-number {
+            font-size: 18px;
             font-weight: 600;
             color: var(--dark-blue);
-            width: 100%;
-            text-align: left;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
-        .calendar-lessons {
-            width: 100%;
+        .day-classes {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
+            margin-top: 5px;
         }
 
-        .calendar-lesson {
-            width: 100%;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
+        .teacher-class {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 4px;
+            justify-content: space-between;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
         }
 
-        .lesson-daniele {
+        .teacher-class.daniele {
             background: rgba(30, 136, 229, 0.1);
             color: var(--daniele-color);
-            border-left: 3px solid var(--daniele-color);
+            border-left: 4px solid var(--daniele-color);
         }
 
-        .lesson-isabela {
+        .teacher-class.isabela {
             background: rgba(0, 188, 212, 0.1);
             color: var(--isabela-color);
-            border-left: 3px solid var(--isabela-color);
+            border-left: 4px solid var(--isabela-color);
         }
 
-        .calendar-total {
-            margin-top: 5px;
-            font-size: 11px;
+        .teacher-class i {
+            margin-right: 5px;
+            font-size: 12px;
+        }
+
+        .class-quantity {
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .day-total {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(79, 195, 247, 0.2);
+            font-weight: 600;
             color: var(--dark-blue);
-            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
         }
 
-        .calendar-legend {
+        .legend {
             display: flex;
+            align-items: center;
             gap: 20px;
             margin-top: 20px;
             padding-top: 20px;
             border-top: 2px solid rgba(79, 195, 247, 0.2);
-            justify-content: center;
         }
 
         .legend-item {
@@ -545,19 +541,21 @@
         }
 
         .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 6px;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
         }
 
-        .color-daniele {
+        .legend-color.daniele {
             background: var(--daniele-color);
-            opacity: 0.3;
         }
 
-        .color-isabela {
+        .legend-color.isabela {
             background: var(--isabela-color);
-            opacity: 0.3;
+        }
+
+        .legend-color.total {
+            background: linear-gradient(135deg, var(--daniele-color), var(--isabela-color));
         }
 
         .records-section {
@@ -565,8 +563,8 @@
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 5px 20px rgba(30, 136, 229, 0.1);
-            margin-top: 25px;
             border: 2px solid rgba(79, 195, 247, 0.2);
+            margin-top: 30px;
         }
 
         .section-title {
@@ -582,6 +580,12 @@
 
         .section-title i {
             color: var(--primary-blue);
+        }
+
+        .section-title small {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-left: auto;
         }
 
         .records-container {
@@ -768,39 +772,6 @@
             border-color: var(--primary-blue);
         }
 
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            justify-content: center;
-        }
-
-        .month-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--primary-blue);
-            padding: 5px;
-            transition: transform 0.3s;
-        }
-
-        .month-btn:hover {
-            transform: scale(1.2);
-        }
-
-        .current-month {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--dark-blue);
-            min-width: 200px;
-            text-align: center;
-            background: rgba(79, 195, 247, 0.1);
-            padding: 10px 20px;
-            border-radius: 15px;
-        }
-
         .empty-state {
             text-align: center;
             padding: 60px 40px;
@@ -848,6 +819,26 @@
             }
         }
 
+        @media (max-width: 1024px) {
+            .calendar-days {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            
+            .calendar-day {
+                min-height: 80px;
+                padding: 10px;
+            }
+            
+            .day-number {
+                font-size: 16px;
+            }
+            
+            .teacher-class {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+        }
+
         @media (max-width: 768px) {
             .grid {
                 gap: 20px;
@@ -881,13 +872,32 @@
                 gap: 10px;
             }
             
-            .calendar-day {
-                padding: 5px;
+            .calendar-header {
+                flex-direction: column;
+                align-items: flex-start;
             }
             
-            .calendar-lesson {
-                font-size: 10px;
+            .calendar-weekdays {
+                font-size: 14px;
+                padding: 10px;
+            }
+            
+            .calendar-day {
+                min-height: 70px;
+                padding: 8px;
+            }
+            
+            .day-number {
+                font-size: 14px;
+            }
+            
+            .teacher-class {
+                font-size: 11px;
                 padding: 2px 4px;
+            }
+            
+            .class-quantity {
+                padding: 1px 4px;
             }
         }
 
@@ -971,6 +981,7 @@
 <body>
     <div class="waves"></div>
     
+    <!-- Gotas de água decorativas -->
     <div class="water-drop" style="left: 10%; animation-delay: 0s;"></div>
     <div class="water-drop" style="left: 30%; animation-delay: 1s;"></div>
     <div class="water-drop" style="left: 50%; animation-delay: 2s;"></div>
@@ -1044,17 +1055,56 @@
                     <i class="fas fa-chart-line"></i>
                     Estatísticas do Mês
                 </h2>
-                <div class="month-selector">
-                    <button class="month-btn" id="prevMonth">
+                <div class="dashboard-grid" id="statsGrid">
+                    <!-- Estatísticas serão carregadas aqui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- CALENDÁRIO DE AULAS -->
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <div class="calendar-title">
+                    <i class="fas fa-calendar-alt" style="font-size: 32px; color: var(--primary-blue);"></i>
+                    <h2 id="calendarMonthTitle">Calendário de Aulas</h2>
+                </div>
+                <div class="calendar-nav">
+                    <button class="calendar-nav-btn" id="prevCalendarMonth">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <div class="current-month" id="currentMonth"></div>
-                    <button class="month-btn" id="nextMonth">
+                    <span id="currentMonthYear" style="font-size: 20px; font-weight: 600; color: var(--dark-blue); min-width: 200px; text-align: center;"></span>
+                    <button class="calendar-nav-btn" id="nextCalendarMonth">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
-                <div class="dashboard-grid" id="statsGrid">
-                    <!-- Estatísticas serão carregadas aqui -->
+            </div>
+
+            <div class="calendar-weekdays">
+                <div>Dom</div>
+                <div>Seg</div>
+                <div>Ter</div>
+                <div>Qua</div>
+                <div>Qui</div>
+                <div>Sex</div>
+                <div>Sáb</div>
+            </div>
+
+            <div class="calendar-days" id="calendarDays">
+                <!-- Dias do calendário serão carregados aqui -->
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color daniele"></div>
+                    <span>Aulas Daniele</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color isabela"></div>
+                    <span>Aulas Isabela</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color total"></div>
+                    <span>Total de Aulas</span>
                 </div>
             </div>
         </div>
@@ -1109,81 +1159,13 @@
                     <div class="indicator-change change-neutral" id="classesDayChange">±0%</div>
                 </div>
             </div>
-
-            <div class="grid">
-                <div class="chart-container">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-bar"></i>
-                        Aulas por Dia (Últimos 7 Dias)
-                    </div>
-                    <canvas id="weeklyChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-pie"></i>
-                        Distribuição por Professora
-                    </div>
-                    <canvas id="teacherChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-container">
-                <div class="chart-title">
-                    <i class="fas fa-chart-line"></i>
-                    Evolução Mensal (Últimos 6 Meses)
-                </div>
-                <canvas id="monthlyChart"></canvas>
-            </div>
-        </div>
-
-        <div class="calendar-section">
-            <div class="calendar-header">
-                <div class="calendar-title">
-                    <i class="fas fa-calendar-alt"></i>
-                    Calendário de Aulas
-                </div>
-                <div class="calendar-controls">
-                    <button class="calendar-btn" id="prevCalendarMonth">
-                        <i class="fas fa-chevron-left"></i>
-                        Mês Anterior
-                    </button>
-                    <button class="calendar-btn" id="nextCalendarMonth">
-                        Próximo Mês
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="calendar-weekdays">
-                <div>Dom</div>
-                <div>Seg</div>
-                <div>Ter</div>
-                <div>Qua</div>
-                <div>Qui</div>
-                <div>Sex</div>
-                <div>Sáb</div>
-            </div>
-            <div class="calendar-days" id="calendarDays">
-                <!-- Dias do calendário serão carregados aqui -->
-            </div>
-            <div class="calendar-legend">
-                <div class="legend-item">
-                    <div class="legend-color color-daniele"></div>
-                    <span>Daniele</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color color-isabela"></div>
-                    <span>Isabela</span>
-                </div>
-            </div>
         </div>
 
         <div class="records-section">
             <h2 class="section-title">
                 <i class="fas fa-history"></i>
                 Aulas Recentes
-                <small style="font-size: 14px; opacity: 0.7; margin-left: auto;">
-                    <span id="filterStatus">Mostrando todas as aulas</span>
-                </small>
+                <small id="filterStatus">Mostrando todas as aulas</small>
             </h2>
             <div class="records-container" id="recordsContainer">
                 <!-- Registros serão carregados aqui -->
@@ -1197,74 +1179,27 @@
     </div>
 
     <script>
-        // =============================================
-        // CONFIGURAÇÃO CORRIGIDA DO FIREBASE
-        // =============================================
-        
-        // Suas credenciais do Firebase
+        // Configuração do Firebase com suas credenciais
         const firebaseConfig = {
             apiKey: "AIzaSyAMA8urWYKIqVcsCNl_P7Lh-sHjGM_AjVw",
             authDomain: "aulas-natacao.firebaseapp.com",
             projectId: "aulas-natacao",
-            storageBucket: "aulas-natacao.appspot.com", // CORRIGIDO: removido .firebasestorage.app
+            storageBucket: "aulas-natacao.firebasestorage.app",
             messagingSenderId: "527894528710",
             appId: "1:527894528710:web:b0f5938e35d40b32ee8dc7"
         };
 
-        // Inicializar Firebase com tratamento de erro
-        let db;
-        
-        try {
-            // Verificar se já existe uma instância
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            } else {
-                firebase.app();
-            }
-            
-            db = firebase.firestore();
-            
-            // Configurar Firestore para usar configurações persistentes
-            db.settings({
-                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
-            });
-            
-            // Habilitar persistência offline
-            db.enablePersistence()
-                .catch((err) => {
-                    if (err.code === 'failed-precondition') {
-                        console.log('Persistência falhou - múltiplas abas abertas');
-                    } else if (err.code === 'unimplemented') {
-                        console.log('Persistência não disponível neste navegador');
-                    }
-                });
-                
-            console.log('Firebase inicializado com sucesso!');
-            
-        } catch (error) {
-            console.error('Erro ao inicializar Firebase:', error);
-            document.getElementById('statusText').textContent = 'Erro de conexão';
-            document.getElementById('statusDot').classList.add('offline');
-        }
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        // =============================================
-        // VARIÁVEIS GLOBAIS
-        // =============================================
-        
+        // Variáveis globais
         let records = [];
         let filteredRecords = [];
         let selectedTeacher = null;
         let currentFilter = 'all';
         let currentDate = new Date();
-        let calendarDate = new Date();
-        let charts = {
-            weekly: null,
-            teacher: null,
-            monthly: null
-        };
-
-        // Dias da semana em português
-        const weekdays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        let calendarDate = new Date(); // Data para o calendário
 
         // Elementos do DOM
         const teacherBtns = document.querySelectorAll('.teacher-btn');
@@ -1275,11 +1210,11 @@
         const statusText = document.getElementById('statusText');
         const statsGrid = document.getElementById('statsGrid');
         const filterBtns = document.querySelectorAll('.filter-btn');
-        const prevMonthBtn = document.getElementById('prevMonth');
-        const nextMonthBtn = document.getElementById('nextMonth');
-        const currentMonthEl = document.getElementById('currentMonth');
         const filterStatus = document.getElementById('filterStatus');
+
+        // Elementos do calendário
         const calendarDays = document.getElementById('calendarDays');
+        const currentMonthYear = document.getElementById('currentMonthYear');
         const prevCalendarMonth = document.getElementById('prevCalendarMonth');
         const nextCalendarMonth = document.getElementById('nextCalendarMonth');
 
@@ -1293,12 +1228,10 @@
         const daysChangeEl = document.getElementById('daysChange');
         const classesDayChangeEl = document.getElementById('classesDayChange');
 
-        // =============================================
-        // FUNÇÕES PRINCIPAIS
-        // =============================================
-
         // Data padrão = hoje
         document.getElementById('date').valueAsDate = new Date();
+
+        // Focar no campo de quantidade
         document.getElementById('quantity').focus();
 
         // Selecionar professora
@@ -1348,7 +1281,7 @@
                 document.getElementById('quantity').focus();
             } catch (error) {
                 console.error('Erro ao salvar:', error);
-                showNotification('Erro ao salvar a aula: ' + error.message, 'error');
+                showNotification('Erro ao salvar a aula', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><span>Salvar na Nuvem</span>';
@@ -1359,11 +1292,6 @@
         async function loadRecords() {
             try {
                 statusText.textContent = 'Carregando dados...';
-                
-                // Verificar se db está definido
-                if (!db) {
-                    throw new Error('Firebase não inicializado');
-                }
                 
                 const snapshot = await db.collection('classes')
                     .orderBy('timestamp', 'desc')
@@ -1383,21 +1311,19 @@
                 
                 console.log('Registros carregados:', records.length);
                 
-                // Atualizar tudo
+                // Atualizar dados filtrados
                 applyFilter();
                 updateStats();
                 updateIndicators();
-                updateCharts();
-                updateCalendar();
+                renderCalendar();
                 
                 statusText.textContent = 'Conectado ao Firebase';
                 statusDot.classList.remove('offline');
-                
             } catch (error) {
                 console.error('Erro ao carregar:', error);
                 statusText.textContent = 'Erro de conexão';
                 statusDot.classList.add('offline');
-                showNotification('Erro ao carregar dados: ' + error.message, 'error');
+                showNotification('Erro ao carregar dados', 'error');
             }
         }
 
@@ -1445,7 +1371,6 @@
             console.log('Filtro aplicado:', currentFilter, 'Registros filtrados:', filteredRecords.length);
             updateRecordsDisplay();
             updateIndicators();
-            updateCharts();
         }
 
         // Atualizar exibição dos registros
@@ -1510,6 +1435,8 @@
                 }
             });
             
+            console.log('Registros do mês:', monthRecords.length);
+            
             const totalClasses = monthRecords.reduce((sum, r) => sum + (r.quantity || 0), 0);
             const danieleClasses = monthRecords
                 .filter(r => r.teacher === 'Daniele')
@@ -1565,15 +1492,19 @@
                 return;
             }
 
+            // Total de aulas (filtrado)
             const totalClasses = filteredRecords.reduce((sum, r) => sum + (r.quantity || 0), 0);
             totalClassesEl.textContent = totalClasses;
 
+            // Dias com aulas (filtrado)
             const uniqueDates = new Set(filteredRecords.map(r => r.date));
             daysWithClassesEl.textContent = uniqueDates.size;
 
+            // Média por dia (filtrado)
             const avgPerDay = uniqueDates.size > 0 ? (totalClasses / uniqueDates.size).toFixed(1) : '0.0';
             avgPerDayEl.textContent = avgPerDay;
 
+            // Média de aulas por dia (considerando todos os dias do período filtrado)
             let totalDays = 1;
             if (filteredRecords.length > 0) {
                 const dates = filteredRecords.map(r => new Date(r.date));
@@ -1585,7 +1516,7 @@
             const classesPerDay = (totalClasses / totalDays).toFixed(1);
             classesPerDayEl.textContent = classesPerDay;
 
-            // Simular variações
+            // Calcular mudanças (simulação - em produção, compararia com período anterior)
             const totalChange = Math.floor(Math.random() * 20) + 5;
             const avgChange = Math.floor(Math.random() * 10) - 5;
             const daysChange = Math.floor(Math.random() * 15) + 3;
@@ -1604,407 +1535,124 @@
             classesDayChangeEl.className = `indicator-change ${classesDayChange > 0 ? 'change-positive' : classesDayChange < 0 ? 'change-negative' : 'change-neutral'}`;
         }
 
+        // FUNÇÕES DO CALENDÁRIO
+        function renderCalendar() {
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            
+            // Atualizar título do mês
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            currentMonthYear.textContent = `${monthNames[month]} ${year}`;
+            
+            // Primeiro dia do mês
+            const firstDay = new Date(year, month, 1);
+            const startDay = firstDay.getDay(); // 0 = Domingo
+            
+            // Último dia do mês
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+            
+            // Limpar calendário
+            calendarDays.innerHTML = '';
+            
+            // Adicionar dias vazios no início
+            for (let i = 0; i < startDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarDays.appendChild(emptyDay);
+            }
+            
+            // Adicionar dias do mês
+            for (let day = 1; day <= totalDays; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                // Verificar se é hoje
+                const today = new Date();
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Buscar registros deste dia
+                const dayRecords = records.filter(r => r.date === dateStr);
+                
+                // Calcular totais por professora
+                const danieleTotal = dayRecords
+                    .filter(r => r.teacher === 'Daniele')
+                    .reduce((sum, r) => sum + (r.quantity || 0), 0);
+                
+                const isabelaTotal = dayRecords
+                    .filter(r => r.teacher === 'Isabela')
+                    .reduce((sum, r) => sum + (r.quantity || 0), 0);
+                
+                const totalDayClasses = danieleTotal + isabelaTotal;
+                
+                // Construir conteúdo do dia
+                let classesHTML = '';
+                
+                if (danieleTotal > 0) {
+                    classesHTML += `
+                        <div class="teacher-class daniele">
+                            <span><i class="fas fa-swimmer"></i> Daniele</span>
+                            <span class="class-quantity">${danieleTotal}</span>
+                        </div>
+                    `;
+                }
+                
+                if (isabelaTotal > 0) {
+                    classesHTML += `
+                        <div class="teacher-class isabela">
+                            <span><i class="fas fa-swimmer"></i> Isabela</span>
+                            <span class="class-quantity">${isabelaTotal}</span>
+                        </div>
+                    `;
+                }
+                
+                dayElement.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    <div class="day-classes">
+                        ${classesHTML}
+                    </div>
+                    ${totalDayClasses > 0 ? `
+                        <div class="day-total">
+                            <span>Total</span>
+                            <span style="font-weight: 700; color: var(--primary-blue);">${totalDayClasses}</span>
+                        </div>
+                    ` : ''}
+                `;
+                
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // Calcular dias restantes para completar a grid
+            const totalCells = Math.ceil((startDay + totalDays) / 7) * 7;
+            const remainingCells = totalCells - (startDay + totalDays);
+            
+            for (let i = 0; i < remainingCells; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarDays.appendChild(emptyDay);
+            }
+        }
+
         // Deletar registro
-        async function deleteRecord(id) {
+        window.deleteRecord = async function(id) {
             if (confirm('Tem certeza que deseja excluir esta aula?')) {
                 try {
                     await db.collection('classes').doc(id).delete();
                     showNotification('Aula excluída com sucesso!', 'success');
                 } catch (error) {
                     console.error('Erro ao excluir:', error);
-                    showNotification('Erro ao excluir aula: ' + error.message, 'error');
+                    showNotification('Erro ao excluir aula', 'error');
                 }
             }
-        }
-
-        // Gráfico semanal CORRIGIDO
-        function updateWeeklyChart() {
-            const ctx = document.getElementById('weeklyChart').getContext('2d');
-            
-            // Gerar últimos 7 dias com os dias da semana corretos
-            const last7Days = [];
-            const today = new Date();
-            
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(today.getDate() - i);
-                last7Days.push(date.toISOString().split('T')[0]);
-            }
-            
-            // Calcular totais por dia com dados filtrados
-            const dailyTotals = last7Days.map(date => {
-                const dayRecords = filteredRecords.filter(r => r.date === date);
-                return dayRecords.reduce((sum, r) => sum + (r.quantity || 0), 0);
-            });
-            
-            // Destruir gráfico anterior se existir
-            if (charts.weekly) {
-                charts.weekly.destroy();
-            }
-            
-            // Formatar labels com o nome do dia da semana
-            const labels = last7Days.map(date => {
-                const d = new Date(date);
-                const dayName = d.toLocaleDateString('pt-BR', { weekday: 'short' });
-                const dayNumber = d.getDate();
-                return `${dayName} ${dayNumber}`;
-            });
-            
-            charts.weekly = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Aulas por Dia',
-                        data: dailyTotals,
-                        backgroundColor: 'rgba(30, 136, 229, 0.8)',
-                        borderColor: 'rgba(30, 136, 229, 1)',
-                        borderWidth: 1,
-                        borderRadius: 5
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.raw} aula${context.raw > 1 ? 's' : ''}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Quantidade de Aulas',
-                                color: '#1565c0'
-                            },
-                            ticks: {
-                                stepSize: 1,
-                                precision: 0,
-                                color: '#1565c0'
-                            },
-                            grid: {
-                                color: 'rgba(79, 195, 247, 0.2)'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Dia da Semana',
-                                color: '#1565c0'
-                            },
-                            ticks: {
-                                color: '#1565c0'
-                            },
-                            grid: {
-                                color: 'rgba(79, 195, 247, 0.1)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Gráfico de distribuição por professora
-        function updateTeacherChart() {
-            const ctx = document.getElementById('teacherChart').getContext('2d');
-            
-            const danieleTotal = filteredRecords
-                .filter(r => r.teacher === 'Daniele')
-                .reduce((sum, r) => sum + (r.quantity || 0), 0);
-            
-            const isabelaTotal = filteredRecords
-                .filter(r => r.teacher === 'Isabela')
-                .reduce((sum, r) => sum + (r.quantity || 0), 0);
-            
-            if (charts.teacher) {
-                charts.teacher.destroy();
-            }
-            
-            if (danieleTotal === 0 && isabelaTotal === 0) {
-                charts.teacher = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Sem dados'],
-                        datasets: [{
-                            data: [1],
-                            backgroundColor: ['rgba(200, 200, 200, 0.5)']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-                return;
-            }
-            
-            charts.teacher = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Daniele', 'Isabela'],
-                    datasets: [{
-                        data: [danieleTotal, isabelaTotal],
-                        backgroundColor: [
-                            'rgba(30, 136, 229, 0.8)',
-                            'rgba(0, 188, 212, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(30, 136, 229, 1)',
-                            'rgba(0, 188, 212, 1)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true,
-                                color: '#1565c0'
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const total = danieleTotal + isabelaTotal;
-                                    const percentage = total > 0 ? 
-                                        Math.round((context.raw / total) * 100) : 0;
-                                    return `${context.label}: ${context.raw} aulas (${percentage}%)`;
-                                }
-                            }
-                        }
-                    },
-                    cutout: '60%'
-                }
-            });
-        }
-
-        // Gráfico mensal
-        function updateMonthlyChart() {
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
-            
-            const months = [];
-            const monthlyDataDaniele = [];
-            const monthlyDataIsabela = [];
-            
-            for (let i = 5; i >= 0; i--) {
-                const date = new Date();
-                date.setMonth(date.getMonth() - i);
-                
-                const monthLabel = date.toLocaleDateString('pt-BR', { 
-                    month: 'short',
-                    year: '2-digit'
-                });
-                
-                months.push(monthLabel);
-                
-                const monthRecords = records.filter(r => {
-                    if (!r.date) return false;
-                    try {
-                        const recordDate = new Date(r.date);
-                        return recordDate.getMonth() === date.getMonth() && 
-                               recordDate.getFullYear() === date.getFullYear();
-                    } catch (e) {
-                        return false;
-                    }
-                });
-                
-                const danieleTotal = monthRecords
-                    .filter(r => r.teacher === 'Daniele')
-                    .reduce((sum, r) => sum + (r.quantity || 0), 0);
-                
-                const isabelaTotal = monthRecords
-                    .filter(r => r.teacher === 'Isabela')
-                    .reduce((sum, r) => sum + (r.quantity || 0), 0);
-                
-                monthlyDataDaniele.push(danieleTotal);
-                monthlyDataIsabela.push(isabelaTotal);
-            }
-            
-            if (charts.monthly) {
-                charts.monthly.destroy();
-            }
-            
-            charts.monthly = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [
-                        {
-                            label: 'Daniele',
-                            data: monthlyDataDaniele,
-                            borderColor: 'rgba(30, 136, 229, 1)',
-                            backgroundColor: 'rgba(30, 136, 229, 0.1)',
-                            borderWidth: 3,
-                            tension: 0.3,
-                            fill: true,
-                            pointBackgroundColor: 'rgba(30, 136, 229, 1)',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8
-                        },
-                        {
-                            label: 'Isabela',
-                            data: monthlyDataIsabela,
-                            borderColor: 'rgba(0, 188, 212, 1)',
-                            backgroundColor: 'rgba(0, 188, 212, 0.1)',
-                            borderWidth: 3,
-                            tension: 0.3,
-                            fill: true,
-                            pointBackgroundColor: 'rgba(0, 188, 212, 1)',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#1565c0'
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Quantidade de Aulas',
-                                color: '#1565c0'
-                            },
-                            ticks: {
-                                stepSize: 1,
-                                precision: 0,
-                                color: '#1565c0'
-                            },
-                            grid: {
-                                color: 'rgba(79, 195, 247, 0.2)'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Mês',
-                                color: '#1565c0'
-                            },
-                            ticks: {
-                                color: '#1565c0'
-                            },
-                            grid: {
-                                color: 'rgba(79, 195, 247, 0.1)'
-                            }
-                        }
-                    },
-                    interaction: {
-                        intersect: false,
-                        mode: 'nearest'
-                    }
-                }
-            });
-        }
-
-        // Atualizar calendário mensal
-        function updateCalendar() {
-            const year = calendarDate.getFullYear();
-            const month = calendarDate.getMonth();
-            
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            
-            const startOffset = firstDay.getDay();
-            const totalDays = lastDay.getDate();
-            
-            let calendarHTML = '';
-            
-            // Dias vazios antes do primeiro dia do mês
-            for (let i = 0; i < startOffset; i++) {
-                calendarHTML += '<div class="calendar-day empty"></div>';
-            }
-            
-            // Dias do mês
-            for (let day = 1; day <= totalDays; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
-                // Buscar aulas deste dia
-                const dayRecords = records.filter(r => r.date === dateStr);
-                
-                // Agrupar por professora
-                const danieleClasses = dayRecords
-                    .filter(r => r.teacher === 'Daniele')
-                    .reduce((sum, r) => sum + (r.quantity || 0), 0);
-                
-                const isabelaClasses = dayRecords
-                    .filter(r => r.teacher === 'Isabela')
-                    .reduce((sum, r) => sum + (r.quantity || 0), 0);
-                
-                const totalClasses = danieleClasses + isabelaClasses;
-                
-                calendarHTML += `
-                    <div class="calendar-day">
-                        <div class="calendar-day-number">${day}</div>
-                        <div class="calendar-lessons">
-                            ${danieleClasses > 0 ? `
-                                <div class="calendar-lesson lesson-daniele">
-                                    <i class="fas fa-swimmer"></i>
-                                    Daniele: ${danieleClasses}
-                                </div>
-                            ` : ''}
-                            ${isabelaClasses > 0 ? `
-                                <div class="calendar-lesson lesson-isabela">
-                                    <i class="fas fa-swimmer"></i>
-                                    Isabela: ${isabelaClasses}
-                                </div>
-                            ` : ''}
-                        </div>
-                        ${totalClasses > 0 ? `
-                            <div class="calendar-total">
-                                Total: ${totalClasses} aula${totalClasses > 1 ? 's' : ''}
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            }
-            
-            calendarDays.innerHTML = calendarHTML;
-        }
+        };
 
         // Funções auxiliares
         function getMonthYearString(date) {
             return `${date.getMonth() + 1}/${date.getFullYear()}`;
-        }
-
-        function updateCurrentMonth() {
-            const options = { month: 'long', year: 'numeric' };
-            currentMonthEl.textContent = currentDate.toLocaleDateString('pt-BR', options);
         }
 
         function showNotification(message, type = 'success') {
@@ -2047,7 +1695,7 @@
             }, 3000);
         }
 
-        // Event Listeners
+        // Filtros
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 filterBtns.forEach(b => b.classList.remove('active'));
@@ -2058,32 +1706,19 @@
             });
         });
 
-        prevMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            updateCurrentMonth();
-            updateStats();
-        });
-
-        nextMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            updateCurrentMonth();
-            updateStats();
-        });
-
+        // Navegação do calendário
         prevCalendarMonth.addEventListener('click', () => {
             calendarDate.setMonth(calendarDate.getMonth() - 1);
-            updateCalendar();
+            renderCalendar();
         });
 
         nextCalendarMonth.addEventListener('click', () => {
             calendarDate.setMonth(calendarDate.getMonth() + 1);
-            updateCalendar();
+            renderCalendar();
         });
 
         // Escutar atualizações em tempo real do Firebase
         function setupRealtimeListener() {
-            if (!db) return;
-            
             db.collection('classes')
                 .orderBy('timestamp', 'desc')
                 .onSnapshot((snapshot) => {
@@ -2097,46 +1732,20 @@
         // Inicializar
         async function init() {
             console.log('Inicializando Aquacris...');
-            
-            // Verificar se o Firebase foi inicializado
-            if (!db) {
-                statusText.textContent = 'Erro de conexão';
-                statusDot.classList.add('offline');
-                showNotification('Erro ao conectar ao Firebase. Verifique sua configuração.', 'error');
-                return;
-            }
-            
             await loadRecords();
-            updateCurrentMonth();
             setupRealtimeListener();
         }
 
         // Iniciar quando a página carregar
         document.addEventListener('DOMContentLoaded', init);
 
-        // Função de debug
+        // Função para verificar dados (debug)
         window.debugData = function() {
             console.log('=== DEBUG AQUACRIS ===');
-            console.log('Firebase DB:', db ? 'Conectado' : 'Desconectado');
             console.log('Total de registros:', records.length);
             console.log('Registros filtrados:', filteredRecords.length);
             console.log('Filtro atual:', currentFilter);
-            console.log('Mês atual:', currentDate.getMonth() + 1);
-            console.log('Mês do calendário:', calendarDate.getMonth() + 1);
-            
-            // Mostrar últimos 7 dias
-            const today = new Date();
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(today.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                const dayName = weekdays[date.getDay()];
-                const dayRecords = records.filter(r => r.date === dateStr);
-                const total = dayRecords.reduce((sum, r) => sum + (r.quantity || 0), 0);
-                console.log(`${dayName} (${dateStr}): ${total} aulas`);
-            }
         };
-
     </script>
 </body>
 </html>
