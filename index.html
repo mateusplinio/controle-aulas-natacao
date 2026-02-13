@@ -1150,6 +1150,23 @@
         .main-content.show {
             display: block;
         }
+
+        /* Instruções de criação de usuário */
+        .login-info {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(30, 136, 229, 0.05);
+            border-radius: 12px;
+            border: 1px dashed var(--primary-blue);
+            color: var(--dark-blue);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .login-info i {
+            color: var(--primary-blue);
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -1169,7 +1186,7 @@
             
             <div class="login-input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" id="loginPassword" class="login-input" placeholder="Senha" type="password" value="admin123">
+                <input type="password" id="loginPassword" class="login-input" placeholder="Senha" value="admin123">
             </div>
             
             <button id="loginBtn" class="login-btn">
@@ -1179,6 +1196,11 @@
             
             <div id="loginError" class="login-error">
                 E-mail ou senha incorretos!
+            </div>
+
+            <div id="loginInfo" class="login-info">
+                <i class="fas fa-info-circle"></i>
+                Primeiro acesso? Clique em "Entrar" e o usuário será criado automaticamente!
             </div>
         </div>
     </div>
@@ -1407,6 +1429,12 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // Configurar persistência para manter login mesmo após fechar o navegador
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .catch((error) => {
+                console.error('Erro ao configurar persistência:', error);
+            });
+
         // Credenciais do único usuário permitido
         const ALLOWED_EMAIL = "admin@aquacris.com";
         const ALLOWED_PASSWORD = "admin123";
@@ -1419,6 +1447,7 @@
         const loginEmail = document.getElementById('loginEmail');
         const loginPassword = document.getElementById('loginPassword');
         const loginError = document.getElementById('loginError');
+        const loginInfo = document.getElementById('loginInfo');
 
         // Variáveis globais
         let records = [];
@@ -1458,22 +1487,27 @@
         // FUNÇÕES DE AUTENTICAÇÃO
         function checkAuthState() {
             auth.onAuthStateChanged((user) => {
-                if (user && user.email === ALLOWED_EMAIL) {
-                    // Usuário autenticado
-                    loginOverlay.style.display = 'none';
-                    mainContent.classList.add('show');
-                    logoutBtn.style.display = 'flex';
-                    init();
+                if (user) {
+                    // Usuário está logado
+                    if (user.email === ALLOWED_EMAIL) {
+                        // É o usuário permitido
+                        loginOverlay.style.display = 'none';
+                        mainContent.classList.add('show');
+                        logoutBtn.style.display = 'flex';
+                        init();
+                    } else {
+                        // É outro usuário - faz logout
+                        auth.signOut();
+                        showLoginError('Acesso negado! Apenas o administrador pode acessar.');
+                        loginOverlay.style.display = 'flex';
+                        mainContent.classList.remove('show');
+                        logoutBtn.style.display = 'none';
+                    }
                 } else {
-                    // Usuário não autenticado
+                    // Usuário não está logado
                     loginOverlay.style.display = 'flex';
                     mainContent.classList.remove('show');
                     logoutBtn.style.display = 'none';
-                    
-                    // Se estiver logado com outro email, faz logout
-                    if (user) {
-                        auth.signOut();
-                    }
                 }
             });
         }
@@ -1484,6 +1518,12 @@
             const email = loginEmail.value.trim();
             const password = loginPassword.value.trim();
             
+            // Verificar se é o email permitido
+            if (email !== ALLOWED_EMAIL) {
+                showLoginError('Acesso negado! Apenas o administrador pode acessar.');
+                return;
+            }
+            
             loginBtn.disabled = true;
             loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
             loginError.classList.remove('show');
@@ -1491,46 +1531,69 @@
             try {
                 // Tentar fazer login
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                console.log('Login bem sucedido:', userCredential.user.email);
                 
-                // Verificar se é o email permitido
-                if (userCredential.user.email !== ALLOWED_EMAIL) {
-                    await auth.signOut();
-                    showLoginError('Acesso negado! Apenas o administrador pode acessar.');
-                }
             } catch (error) {
                 console.error('Erro no login:', error);
                 
-                // Se o usuário não existir, tentar criar
                 if (error.code === 'auth/user-not-found') {
+                    // Usuário não existe - tentar criar
                     try {
-                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        loginInfo.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando usuário...';
                         
-                        if (userCredential.user.email === ALLOWED_EMAIL) {
-                            showNotification('Usuário criado com sucesso!', 'success');
-                        } else {
-                            await auth.signOut();
-                            showLoginError('Acesso negado! Apenas o administrador pode acessar.');
-                        }
+                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        console.log('Usuário criado com sucesso:', userCredential.user.email);
+                        
+                        showNotification('Usuário criado com sucesso! Bem-vindo ao Aquacris!', 'success');
+                        
                     } catch (createError) {
                         console.error('Erro ao criar usuário:', createError);
-                        showLoginError('Erro ao criar usuário. Tente novamente.');
+                        
+                        if (createError.code === 'auth/email-already-in-use') {
+                            showLoginError('Este e-mail já está em uso por outro usuário.');
+                        } else if (createError.code === 'auth/weak-password') {
+                            showLoginError('A senha deve ter pelo menos 6 caracteres.');
+                        } else {
+                            showLoginError('Erro ao criar usuário. Tente novamente.');
+                        }
+                        
+                        loginInfo.innerHTML = '<i class="fas fa-info-circle"></i> Primeiro acesso? Clique em "Entrar" e o usuário será criado automaticamente!';
                     }
+                } else if (error.code === 'auth/wrong-password') {
+                    showLoginError('Senha incorreta!');
+                } else if (error.code === 'auth/invalid-email') {
+                    showLoginError('E-mail inválido!');
+                } else if (error.code === 'auth/too-many-requests') {
+                    showLoginError('Muitas tentativas de login. Tente novamente mais tarde.');
                 } else {
-                    showLoginError('E-mail ou senha incorretos!');
+                    showLoginError('Erro ao fazer login. Tente novamente.');
                 }
             } finally {
                 loginBtn.disabled = false;
                 loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar no Sistema';
+                loginInfo.innerHTML = '<i class="fas fa-info-circle"></i> Primeiro acesso? Clique em "Entrar" e o usuário será criado automaticamente!';
             }
         }
 
         function showLoginError(message) {
             loginError.textContent = message;
             loginError.classList.add('show');
+            
+            // Esconder a mensagem após 5 segundos
+            setTimeout(() => {
+                loginError.classList.remove('show');
+            }, 5000);
         }
 
         function handleLogout() {
-            auth.signOut();
+            auth.signOut()
+                .then(() => {
+                    console.log('Logout realizado com sucesso');
+                    showNotification('Você saiu do sistema', 'success');
+                })
+                .catch((error) => {
+                    console.error('Erro ao fazer logout:', error);
+                });
         }
 
         // Event listeners de autenticação
