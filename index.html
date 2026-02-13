@@ -1150,23 +1150,6 @@
         .main-content.show {
             display: block;
         }
-
-        /* Instruções */
-        .login-info {
-            margin-top: 30px;
-            padding: 15px;
-            background: rgba(30, 136, 229, 0.05);
-            border-radius: 12px;
-            border: 1px dashed var(--primary-blue);
-            color: var(--dark-blue);
-            font-size: 13px;
-            text-align: center;
-        }
-
-        .login-info i {
-            color: var(--primary-blue);
-            margin-right: 5px;
-        }
     </style>
 </head>
 <body>
@@ -1196,11 +1179,6 @@
             
             <div id="loginError" class="login-error">
                 E-mail ou senha incorretos!
-            </div>
-
-            <div class="login-info">
-                <i class="fas fa-info-circle"></i>
-                Use o e-mail: <strong>admin@aquacris.com</strong> e senha: <strong>admin123</strong>
             </div>
         </div>
     </div>
@@ -1535,7 +1513,7 @@
                 console.error('Erro no login:', error);
                 
                 if (error.code === 'auth/user-not-found') {
-                    showLoginError('Usuário não encontrado! Crie o usuário no console do Firebase primeiro.');
+                    showLoginError('Usuário não encontrado! Verifique suas credenciais.');
                 } else if (error.code === 'auth/wrong-password') {
                     showLoginError('Senha incorreta!');
                 } else if (error.code === 'auth/invalid-email') {
