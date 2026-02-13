@@ -7,6 +7,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <!-- Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -976,206 +977,418 @@
             background: rgba(255, 152, 0, 0.1);
             color: var(--warning);
         }
+
+        /* ESTILOS DA TELA DE LOGIN */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, var(--light-bg) 0%, #ffffff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .login-card {
+            background: var(--white);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(30, 136, 229, 0.2);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--aqua-blue), var(--light-blue));
+        }
+
+        .login-icon {
+            text-align: center;
+            font-size: 80px;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: var(--primary-blue);
+            margin-bottom: 40px;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .login-input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .login-input-group i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-blue);
+            font-size: 20px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 18px 18px 18px 55px;
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: rgba(79, 195, 247, 0.05);
+            color: var(--dark-blue);
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, var(--primary-blue), var(--aqua-blue));
+            color: var(--white);
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(30, 136, 229, 0.3);
+        }
+
+        .login-error {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            padding: 10px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.2);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+        }
+
+        .logout-btn i {
+            font-size: 18px;
+        }
+
+        .main-content {
+            display: none;
+        }
+
+        .main-content.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <div class="waves"></div>
-    
-    <!-- Gotas de água decorativas -->
-    <div class="water-drop" style="left: 10%; animation-delay: 0s;"></div>
-    <div class="water-drop" style="left: 30%; animation-delay: 1s;"></div>
-    <div class="water-drop" style="left: 50%; animation-delay: 2s;"></div>
-    <div class="water-drop" style="left: 70%; animation-delay: 1.5s;"></div>
-    <div class="water-drop" style="left: 90%; animation-delay: 0.5s;"></div>
-
-    <div class="container">
-        <div class="header">
-            <h1>
+    <!-- TELA DE LOGIN -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <div class="login-icon">
                 <i class="fas fa-swimming-pool"></i>
-                Aquacris - Sistema de Aulas de Natação
-            </h1>
-            <p>Controle e análise das aulas ministradas pelas professoras Daniele e Isabela</p>
-        </div>
-
-        <div class="grid">
-            <div class="card form-section">
-                <h2 class="section-title">
-                    <i class="fas fa-plus-circle"></i>
-                    Nova Aula
-                </h2>
-                <form id="classForm">
-                    <div class="form-group">
-                        <label for="date">
-                            <i class="far fa-calendar-alt"></i>
-                            Data da Aula:
-                        </label>
-                        <input type="date" id="date" name="date" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-user-swimmer"></i>
-                            Professora:
-                        </label>
-                        <div class="teacher-buttons">
-                            <button type="button" class="teacher-btn" data-teacher="Daniele">
-                                <i class="fas fa-swimmer"></i>
-                                Daniele
-                            </button>
-                            <button type="button" class="teacher-btn" data-teacher="Isabela">
-                                <i class="fas fa-swimmer"></i>
-                                Isabela
-                            </button>
-                        </div>
-                        <input type="hidden" id="teacher" name="teacher" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="quantity">
-                            <i class="fas fa-water"></i>
-                            Quantidade de Aulas:
-                        </label>
-                        <div class="quantity-input-container">
-                            <input type="number" id="quantity" name="quantity" 
-                                   min="1" max="20" required 
-                                   placeholder="Digite a quantidade">
-                            <i class="fas fa-hashtag"></i>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn" id="submitBtn">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span>Salvar na Nuvem</span>
-                    </button>
-                </form>
             </div>
-
-            <div class="card">
-                <h2 class="section-title">
-                    <i class="fas fa-chart-line"></i>
-                    Estatísticas do Mês
-                </h2>
-                <div class="dashboard-grid" id="statsGrid">
-                    <!-- Estatísticas serão carregadas aqui -->
-                </div>
+            <div class="login-title">Aquacris</div>
+            <div class="login-subtitle">Faça login para acessar o sistema</div>
+            
+            <div class="login-input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="loginEmail" class="login-input" placeholder="E-mail" value="admin@aquacris.com">
             </div>
-        </div>
-
-        <!-- CALENDÁRIO DE AULAS -->
-        <div class="calendar-section">
-            <div class="calendar-header">
-                <div class="calendar-title">
-                    <i class="fas fa-calendar-alt" style="font-size: 32px; color: var(--primary-blue);"></i>
-                    <h2 id="calendarMonthTitle">Calendário de Aulas</h2>
-                </div>
-                <div class="calendar-nav">
-                    <button class="calendar-nav-btn" id="prevCalendarMonth">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <span id="currentMonthYear" style="font-size: 20px; font-weight: 600; color: var(--dark-blue); min-width: 200px; text-align: center;"></span>
-                    <button class="calendar-nav-btn" id="nextCalendarMonth">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
+            
+            <div class="login-input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="loginPassword" class="login-input" placeholder="Senha" type="password" value="admin123">
             </div>
-
-            <div class="calendar-weekdays">
-                <div>Dom</div>
-                <div>Seg</div>
-                <div>Ter</div>
-                <div>Qua</div>
-                <div>Qui</div>
-                <div>Sex</div>
-                <div>Sáb</div>
-            </div>
-
-            <div class="calendar-days" id="calendarDays">
-                <!-- Dias do calendário serão carregados aqui -->
-            </div>
-
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color daniele"></div>
-                    <span>Aulas Daniele</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color isabela"></div>
-                    <span>Aulas Isabela</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color total"></div>
-                    <span>Total de Aulas</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="dashboard-section">
-            <div class="filter-section">
-                <button class="filter-btn active" data-filter="all">
-                    <i class="fas fa-list"></i>
-                    Todas as Aulas
-                </button>
-                <button class="filter-btn" data-filter="Daniele">
-                    <i class="fas fa-swimmer"></i>
-                    Apenas Daniele
-                </button>
-                <button class="filter-btn" data-filter="Isabela">
-                    <i class="fas fa-swimmer"></i>
-                    Apenas Isabela
-                </button>
-                <button class="filter-btn" data-filter="today">
-                    <i class="far fa-calendar"></i>
-                    Hoje
-                </button>
-                <button class="filter-btn" data-filter="week">
-                    <i class="far fa-calendar-alt"></i>
-                    Esta Semana
-                </button>
-                <button class="filter-btn" data-filter="month">
-                    <i class="fas fa-calendar"></i>
-                    Este Mês
-                </button>
-            </div>
-
-            <div class="indicators">
-                <div class="indicator-card">
-                    <div class="indicator-label">Total de Aulas (Filtrado)</div>
-                    <div class="indicator-value" id="totalClasses">0</div>
-                    <div class="indicator-change change-positive" id="totalChange">+0%</div>
-                </div>
-                <div class="indicator-card">
-                    <div class="indicator-label">Média por Dia</div>
-                    <div class="indicator-value" id="avgPerDay">0.0</div>
-                    <div class="indicator-change change-neutral" id="avgChange">±0%</div>
-                </div>
-                <div class="indicator-card">
-                    <div class="indicator-label">Dias com Aulas</div>
-                    <div class="indicator-value" id="daysWithClasses">0</div>
-                    <div class="indicator-change change-positive" id="daysChange">+0%</div>
-                </div>
-                <div class="indicator-card">
-                    <div class="indicator-label">Aulas/Dia (Média)</div>
-                    <div class="indicator-value" id="classesPerDay">0.0</div>
-                    <div class="indicator-change change-neutral" id="classesDayChange">±0%</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="records-section">
-            <h2 class="section-title">
-                <i class="fas fa-history"></i>
-                Aulas Recentes
-                <small id="filterStatus">Mostrando todas as aulas</small>
-            </h2>
-            <div class="records-container" id="recordsContainer">
-                <!-- Registros serão carregados aqui -->
+            
+            <button id="loginBtn" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Entrar no Sistema
+            </button>
+            
+            <div id="loginError" class="login-error">
+                E-mail ou senha incorretos!
             </div>
         </div>
     </div>
 
-    <div class="firebase-status">
-        <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">Conectando ao Firebase...</span>
+    <!-- BOTÃO DE LOGOUT -->
+    <button id="logoutBtn" class="logout-btn" style="display: none;">
+        <i class="fas fa-sign-out-alt"></i>
+        Sair
+    </button>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="mainContent" class="main-content">
+        <div class="waves"></div>
+        
+        <!-- Gotas de água decorativas -->
+        <div class="water-drop" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="water-drop" style="left: 30%; animation-delay: 1s;"></div>
+        <div class="water-drop" style="left: 50%; animation-delay: 2s;"></div>
+        <div class="water-drop" style="left: 70%; animation-delay: 1.5s;"></div>
+        <div class="water-drop" style="left: 90%; animation-delay: 0.5s;"></div>
+
+        <div class="container">
+            <div class="header">
+                <h1>
+                    <i class="fas fa-swimming-pool"></i>
+                    Aquacris - Sistema de Aulas de Natação
+                </h1>
+                <p>Controle e análise das aulas ministradas pelas professoras Daniele e Isabela</p>
+            </div>
+
+            <div class="grid">
+                <div class="card form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-plus-circle"></i>
+                        Nova Aula
+                    </h2>
+                    <form id="classForm">
+                        <div class="form-group">
+                            <label for="date">
+                                <i class="far fa-calendar-alt"></i>
+                                Data da Aula:
+                            </label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-user-swimmer"></i>
+                                Professora:
+                            </label>
+                            <div class="teacher-buttons">
+                                <button type="button" class="teacher-btn" data-teacher="Daniele">
+                                    <i class="fas fa-swimmer"></i>
+                                    Daniele
+                                </button>
+                                <button type="button" class="teacher-btn" data-teacher="Isabela">
+                                    <i class="fas fa-swimmer"></i>
+                                    Isabela
+                                </button>
+                            </div>
+                            <input type="hidden" id="teacher" name="teacher" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantity">
+                                <i class="fas fa-water"></i>
+                                Quantidade de Aulas:
+                            </label>
+                            <div class="quantity-input-container">
+                                <input type="number" id="quantity" name="quantity" 
+                                       min="1" max="20" required 
+                                       placeholder="Digite a quantidade">
+                                <i class="fas fa-hashtag"></i>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn" id="submitBtn">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Salvar na Nuvem</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-line"></i>
+                        Estatísticas do Mês
+                    </h2>
+                    <div class="dashboard-grid" id="statsGrid">
+                        <!-- Estatísticas serão carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- CALENDÁRIO DE AULAS -->
+            <div class="calendar-section">
+                <div class="calendar-header">
+                    <div class="calendar-title">
+                        <i class="fas fa-calendar-alt" style="font-size: 32px; color: var(--primary-blue);"></i>
+                        <h2 id="calendarMonthTitle">Calendário de Aulas</h2>
+                    </div>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" id="prevCalendarMonth">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="currentMonthYear" style="font-size: 20px; font-weight: 600; color: var(--dark-blue); min-width: 200px; text-align: center;"></span>
+                        <button class="calendar-nav-btn" id="nextCalendarMonth">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="calendar-weekdays">
+                    <div>Dom</div>
+                    <div>Seg</div>
+                    <div>Ter</div>
+                    <div>Qua</div>
+                    <div>Qui</div>
+                    <div>Sex</div>
+                    <div>Sáb</div>
+                </div>
+
+                <div class="calendar-days" id="calendarDays">
+                    <!-- Dias do calendário serão carregados aqui -->
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color daniele"></div>
+                        <span>Aulas Daniele</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color isabela"></div>
+                        <span>Aulas Isabela</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color total"></div>
+                        <span>Total de Aulas</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <div class="filter-section">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-list"></i>
+                        Todas as Aulas
+                    </button>
+                    <button class="filter-btn" data-filter="Daniele">
+                        <i class="fas fa-swimmer"></i>
+                        Apenas Daniele
+                    </button>
+                    <button class="filter-btn" data-filter="Isabela">
+                        <i class="fas fa-swimmer"></i>
+                        Apenas Isabela
+                    </button>
+                    <button class="filter-btn" data-filter="today">
+                        <i class="far fa-calendar"></i>
+                        Hoje
+                    </button>
+                    <button class="filter-btn" data-filter="week">
+                        <i class="far fa-calendar-alt"></i>
+                        Esta Semana
+                    </button>
+                    <button class="filter-btn" data-filter="month">
+                        <i class="fas fa-calendar"></i>
+                        Este Mês
+                    </button>
+                </div>
+
+                <div class="indicators">
+                    <div class="indicator-card">
+                        <div class="indicator-label">Total de Aulas (Filtrado)</div>
+                        <div class="indicator-value" id="totalClasses">0</div>
+                        <div class="indicator-change change-positive" id="totalChange">+0%</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-label">Média por Dia</div>
+                        <div class="indicator-value" id="avgPerDay">0.0</div>
+                        <div class="indicator-change change-neutral" id="avgChange">±0%</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-label">Dias com Aulas</div>
+                        <div class="indicator-value" id="daysWithClasses">0</div>
+                        <div class="indicator-change change-positive" id="daysChange">+0%</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-label">Aulas/Dia (Média)</div>
+                        <div class="indicator-value" id="classesPerDay">0.0</div>
+                        <div class="indicator-change change-neutral" id="classesDayChange">±0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="records-section">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i>
+                    Aulas Recentes
+                    <small id="filterStatus">Mostrando todas as aulas</small>
+                </h2>
+                <div class="records-container" id="recordsContainer">
+                    <!-- Registros serão carregados aqui -->
+                </div>
+            </div>
+        </div>
+
+        <div class="firebase-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Conectando ao Firebase...</span>
+        </div>
     </div>
 
     <script>
@@ -1192,6 +1405,20 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Credenciais do único usuário permitido
+        const ALLOWED_EMAIL = "admin@aquacris.com";
+        const ALLOWED_PASSWORD = "admin123";
+
+        // Elementos da autenticação
+        const loginOverlay = document.getElementById('loginOverlay');
+        const mainContent = document.getElementById('mainContent');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginError = document.getElementById('loginError');
 
         // Variáveis globais
         let records = [];
@@ -1199,7 +1426,7 @@
         let selectedTeacher = null;
         let currentFilter = 'all';
         let currentDate = new Date();
-        let calendarDate = new Date(); // Data para o calendário
+        let calendarDate = new Date();
 
         // Elementos do DOM
         const teacherBtns = document.querySelectorAll('.teacher-btn');
@@ -1227,6 +1454,96 @@
         const avgChangeEl = document.getElementById('avgChange');
         const daysChangeEl = document.getElementById('daysChange');
         const classesDayChangeEl = document.getElementById('classesDayChange');
+
+        // FUNÇÕES DE AUTENTICAÇÃO
+        function checkAuthState() {
+            auth.onAuthStateChanged((user) => {
+                if (user && user.email === ALLOWED_EMAIL) {
+                    // Usuário autenticado
+                    loginOverlay.style.display = 'none';
+                    mainContent.classList.add('show');
+                    logoutBtn.style.display = 'flex';
+                    init();
+                } else {
+                    // Usuário não autenticado
+                    loginOverlay.style.display = 'flex';
+                    mainContent.classList.remove('show');
+                    logoutBtn.style.display = 'none';
+                    
+                    // Se estiver logado com outro email, faz logout
+                    if (user) {
+                        auth.signOut();
+                    }
+                }
+            });
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value.trim();
+            
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+            loginError.classList.remove('show');
+            
+            try {
+                // Tentar fazer login
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                
+                // Verificar se é o email permitido
+                if (userCredential.user.email !== ALLOWED_EMAIL) {
+                    await auth.signOut();
+                    showLoginError('Acesso negado! Apenas o administrador pode acessar.');
+                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                
+                // Se o usuário não existir, tentar criar
+                if (error.code === 'auth/user-not-found') {
+                    try {
+                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        
+                        if (userCredential.user.email === ALLOWED_EMAIL) {
+                            showNotification('Usuário criado com sucesso!', 'success');
+                        } else {
+                            await auth.signOut();
+                            showLoginError('Acesso negado! Apenas o administrador pode acessar.');
+                        }
+                    } catch (createError) {
+                        console.error('Erro ao criar usuário:', createError);
+                        showLoginError('Erro ao criar usuário. Tente novamente.');
+                    }
+                } else {
+                    showLoginError('E-mail ou senha incorretos!');
+                }
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar no Sistema';
+            }
+        }
+
+        function showLoginError(message) {
+            loginError.textContent = message;
+            loginError.classList.add('show');
+        }
+
+        function handleLogout() {
+            auth.signOut();
+        }
+
+        // Event listeners de autenticação
+        loginBtn.addEventListener('click', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // Permitir login com Enter
+        loginEmail.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin(e);
+        });
+        loginPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin(e);
+        });
 
         // Data padrão = hoje
         document.getElementById('date').valueAsDate = new Date();
@@ -1729,15 +2046,15 @@
                 });
         }
 
-        // Inicializar
+        // Inicializar (só é chamado após autenticação)
         async function init() {
             console.log('Inicializando Aquacris...');
             await loadRecords();
             setupRealtimeListener();
         }
 
-        // Iniciar quando a página carregar
-        document.addEventListener('DOMContentLoaded', init);
+        // Verificar estado de autenticação ao carregar a página
+        checkAuthState();
 
         // Função para verificar dados (debug)
         window.debugData = function() {
