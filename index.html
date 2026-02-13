@@ -1151,7 +1151,7 @@
             display: block;
         }
 
-        /* Instruções de criação de usuário */
+        /* Instruções */
         .login-info {
             margin-top: 30px;
             padding: 15px;
@@ -1198,9 +1198,9 @@
                 E-mail ou senha incorretos!
             </div>
 
-            <div id="loginInfo" class="login-info">
+            <div class="login-info">
                 <i class="fas fa-info-circle"></i>
-                Primeiro acesso? Clique em "Entrar" e o usuário será criado automaticamente!
+                Use o e-mail: <strong>admin@aquacris.com</strong> e senha: <strong>admin123</strong>
             </div>
         </div>
     </div>
@@ -1437,7 +1437,6 @@
 
         // Credenciais do único usuário permitido
         const ALLOWED_EMAIL = "admin@aquacris.com";
-        const ALLOWED_PASSWORD = "admin123";
 
         // Elementos da autenticação
         const loginOverlay = document.getElementById('loginOverlay');
@@ -1447,7 +1446,6 @@
         const loginEmail = document.getElementById('loginEmail');
         const loginPassword = document.getElementById('loginPassword');
         const loginError = document.getElementById('loginError');
-        const loginInfo = document.getElementById('loginInfo');
 
         // Variáveis globais
         let records = [];
@@ -1530,35 +1528,14 @@
             
             try {
                 // Tentar fazer login
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                console.log('Login bem sucedido:', userCredential.user.email);
+                await auth.signInWithEmailAndPassword(email, password);
+                console.log('Login bem sucedido');
                 
             } catch (error) {
                 console.error('Erro no login:', error);
                 
                 if (error.code === 'auth/user-not-found') {
-                    // Usuário não existe - tentar criar
-                    try {
-                        loginInfo.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando usuário...';
-                        
-                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                        console.log('Usuário criado com sucesso:', userCredential.user.email);
-                        
-                        showNotification('Usuário criado com sucesso! Bem-vindo ao Aquacris!', 'success');
-                        
-                    } catch (createError) {
-                        console.error('Erro ao criar usuário:', createError);
-                        
-                        if (createError.code === 'auth/email-already-in-use') {
-                            showLoginError('Este e-mail já está em uso por outro usuário.');
-                        } else if (createError.code === 'auth/weak-password') {
-                            showLoginError('A senha deve ter pelo menos 6 caracteres.');
-                        } else {
-                            showLoginError('Erro ao criar usuário. Tente novamente.');
-                        }
-                        
-                        loginInfo.innerHTML = '<i class="fas fa-info-circle"></i> Primeiro acesso? Clique em "Entrar" e o usuário será criado automaticamente!';
-                    }
+                    showLoginError('Usuário não encontrado! Crie o usuário no console do Firebase primeiro.');
                 } else if (error.code === 'auth/wrong-password') {
                     showLoginError('Senha incorreta!');
                 } else if (error.code === 'auth/invalid-email') {
@@ -1571,7 +1548,6 @@
             } finally {
                 loginBtn.disabled = false;
                 loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar no Sistema';
-                loginInfo.innerHTML = '<i class="fas fa-info-circle"></i> Primeiro acesso? Clique em "Entrar" e o usuário será criado automaticamente!';
             }
         }
 
